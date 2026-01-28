@@ -4,26 +4,26 @@ const config = require('./config');
 
 // User data scripts are run as the root user
 function buildUserDataScript(githubRegistrationToken, label) {
-    return [
-      '#!/bin/bash',
-      'mkswap /dev/nvme1n1',
-      'swapon /dev/nvme1n1',
-      'yum install docker git libicu -y -y ',
-      'yum remove -y awscli',
-      'curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"',
-      'unzip awscliv2.zip',
-      './aws/install',
-      'service docker start',
-      'curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose',
-      'chmod +x /usr/bin/docker-compose',
-      'mkdir actions-runner && cd actions-runner',
-      'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
-      'curl -O -L https://github.com/actions/runner/releases/download/v2.317.0/actions-runner-linux-${RUNNER_ARCH}-2.317.0.tar.gz',
-      'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-2.317.0.tar.gz',
-      'export RUNNER_ALLOW_RUNASROOT=1',
-      `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}  --unattended`,
-      './run.sh',
-    ];
+  return [
+    '#!/bin/bash',
+    'mkswap /dev/nvme1n1',
+    'swapon /dev/nvme1n1',
+    'yum install docker git libicu unzip -y -y ',
+    'yum remove -y awscli',
+    'curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"',
+    'unzip awscliv2.zip',
+    './aws/install',
+    'service docker start',
+    'curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose',
+    'chmod +x /usr/bin/docker-compose',
+    'mkdir actions-runner && cd actions-runner',
+    'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
+    'curl -O -L https://github.com/actions/runner/releases/download/v2.317.0/actions-runner-linux-${RUNNER_ARCH}-2.317.0.tar.gz',
+    'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-2.317.0.tar.gz',
+    'export RUNNER_ALLOW_RUNASROOT=1',
+    `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}  --unattended`,
+    './run.sh',
+  ];
 }
 
 async function startEc2Instance(label, githubRegistrationToken) {
@@ -41,23 +41,25 @@ async function startEc2Instance(label, githubRegistrationToken) {
     SecurityGroupIds: [config.input.securityGroupId],
     IamInstanceProfile: { Name: config.input.iamRoleName },
     TagSpecifications: config.tagSpecifications,
-    KeyName: "proto",
-    BlockDeviceMappings: [{
-      DeviceName: "/dev/xvda",
-      Ebs: {
-        DeleteOnTermination: true ,
-        VolumeSize: 30,
-        VolumeType: 'gp2'
-      }
-    },
-    {
-      DeviceName: "/dev/sdb",
-      Ebs: {
-        DeleteOnTermination: true ,
-        VolumeSize: 15,
-        VolumeType: 'gp2'
-      }
-    }],
+    KeyName: 'proto',
+    BlockDeviceMappings: [
+      {
+        DeviceName: '/dev/xvda',
+        Ebs: {
+          DeleteOnTermination: true,
+          VolumeSize: 30,
+          VolumeType: 'gp2',
+        },
+      },
+      {
+        DeviceName: '/dev/sdb',
+        Ebs: {
+          DeleteOnTermination: true,
+          VolumeSize: 15,
+          VolumeType: 'gp2',
+        },
+      },
+    ],
   };
 
   try {
