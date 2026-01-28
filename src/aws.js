@@ -8,7 +8,7 @@ function buildUserDataScript(githubRegistrationToken, label) {
       '#!/bin/bash',
       'mkswap /dev/nvme1n1',
       'swapon /dev/nvme1n1',
-      'yum install docker git libicu60 -y -y ',
+      'yum install docker git libicu -y -y ',
       'yum remove -y awscli',
       'curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"',
       'unzip awscliv2.zip',
